@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ระบบดูแลพฤติกรรมนักเรียน</title>
+  <style>
+    body {
+      font-family: "Sarabun", sans-serif;
+      background-color: #f9f8ff;
+      margin: 0;
+      padding: 0;
+      color: #4b0082;
+    }
+    header {
+      background-color: #6a0dad;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    header h1 {
+      font-size: 2rem;
+      margin-bottom: 0.2em;
+    }
+    header h2 {
+      font-size: 1.2rem;
+      font-weight: normal;
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    nav button {
+      background-color: #6a0dad;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 0 10px;
+      cursor: pointer;
+      font-size: 1rem;
+      border-radius: 8px;
+    }
+    section {
+      max-width: 500px;
+      margin: auto;
+      padding: 20px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    form > div {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button.submit-btn {
+      background-color: #6a0dad;
+      color: white;
+      border: none;
+      padding: 10px;
+      width: 100%;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    #popup {
+      display: none;
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: #6a0dad;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>ระบบดูแลพฤติกรรมนักเรียน</h1>
+    <h2>โรงเรียนบ้านหนองม่วงวิทยาคาร</h2>
+  </header>
+
+  <nav>
+    <button onclick="showForm('checkinForm')">ระบบเข้าแถว</button>
+    <button onclick="showForm('behaviorForm')">ระบบคะแนนพฤติกรรม</button>
+  </nav>
+
+  <section id="checkinForm">
+    <form onsubmit="submitForm(event, 'checkin')">
+      <div>
+        <label>ชื่อนักเรียน</label>
+        <input type="text" name="name" required />
+      </div>
+      <div>
+        <label>ห้องเรียน</label>
+        <input type="text" name="classroom" required />
+      </div>
+      <div>
+        <label>สถานะ</label>
+        <select name="status" required>
+          <option value="มา">มา</option>
+          <option value="ขาด">ขาด</option>
+          <option value="มาสาย">มาสาย</option>
+          <option value="ลา">ลา</option>
+        </select>
+      </div>
+      <div>
+        <label>เหตุผล (ถ้ามี)</label>
+        <textarea name="reason"></textarea>
+      </div>
+      <button type="submit" class="submit-btn">บันทึกการเข้าแถว</button>
+    </form>
+  </section>
+
+  <section id="behaviorForm" style="display:none;">
+    <form onsubmit="submitForm(event, 'behavior')">
+      <div>
+        <label>ชื่อนักเรียน</label>
+        <input type="text" name="name" required />
+      </div>
+      <div>
+        <label>ห้องเรียน</label>
+        <input type="text" name="classroom" required />
+      </div>
+      <div>
+        <label>พฤติกรรม</label>
+        <input type="text" name="behavior" required />
+      </div>
+      <div>
+        <label>คะแนน (ใส่เลขลบถ้าตัดคะแนน เช่น -5)</label>
+        <input type="number" name="score" required />
+      </div>
+      <button type="submit" class="submit-btn">บันทึกพฤติกรรม</button>
+    </form>
+  </section>
+
+  <div id="popup">✅ บันทึกข้อมูลสำเร็จ</div>
+
+  <script>
+    const scriptURL = 'https://script.google.com/macros/library/d/1WBOJUTBELyJN2Sjk9NHFOJqjQ5fCcLsRRvwaNHWqJsA180OdGmHCuFmk/1';
+
+    function showForm(id) {
+      document.getElementById('checkinForm').style.display = 'none';
+      document.getElementById('behaviorForm').style.display = 'none';
+      document.getElementById(id).style.display = 'block';
+    }
+
+    function submitForm(event, type) {
+      event.preventDefault();
+      const form = event.target;
+      const data = {
+        type: type,
+        name: form.name.value,
+        classroom: form.classroom.value
+      };
+
+      if (type === 'checkin') {
+        data.status = form.status.value;
+        data.reason = form.reason.value;
+      } else if (type === 'behavior') {
+        data.behavior = form.behavior.value;
+        data.score = form.score.value;
+      }
+
+      fetch(scriptURL, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      .then(() => {
+        form.reset();
+        showPopup();
+      })
+      .catch(err => alert("เกิดข้อผิดพลาด: " + err));
+    }
+
+    function showPopup() {
+      const popup = document.getElementById("popup");
+      popup.style.display = "block";
+      setTimeout(() => {
+        popup.style.display = "none";
+      }, 2500);
+    }
+  </script>
+</body>
+</html>
