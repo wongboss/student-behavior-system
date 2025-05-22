@@ -149,7 +149,7 @@
   <div id="popup">✅ บันทึกข้อมูลสำเร็จ</div>
 
   <script>
-    const scriptURL = '<<https://script.google.com/macros/s/AKfycbxQBU75fyWhSgxWiRLShOkYEFhQ0aXxdbPiPL-ERD5sFvApGgCu0ccylDiy8--e7zrQfQ/exec>>';
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxQBU75fyWhSgxWiRLShOkYEFhQ0aXxdbPiPL-ERD5sFvApGgCu0ccylDiy8--e7zrQfQ/exec';
 
     function showForm(id) {
       document.getElementById('checkinForm').style.display = 'none';
