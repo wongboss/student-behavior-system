@@ -95,6 +95,7 @@
   <nav>
     <button onclick="showForm('checkinForm')">ระบบเข้าแถว</button>
     <button onclick="showForm('behaviorForm')">ระบบคะแนนพฤติกรรม</button>
+    <button onclick="showForm('uploadSection')">นำเข้ารายชื่อ</button>
   </nav>
 
   <section id="checkinForm">
@@ -146,6 +147,12 @@
     </form>
   </section>
 
+  <section id="uploadSection">
+  <h3>นำเข้ารายชื่อนักเรียน (.csv)</h3>
+  <input type="file" id="csvFile" accept=".csv" />
+  <button onclick="uploadCSV()">อัปโหลด</button>
+</section>
+
   <div id="popup">✅ บันทึกข้อมูลสำเร็จ</div>
 
   <script>
@@ -195,6 +202,40 @@
         popup.style.display = "none";
       }, 2500);
     }
+
+    function uploadCSV() {
+  const fileInput = document.getElementById('csvFile');
+  const file = fileInput.files[0];
+
+  if (!file) {
+    alert("กรุณาเลือกไฟล์ CSV");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const lines = e.target.result.split('\n').map(line => line.split(','));
+    const headers = lines[0];
+    const students = lines.slice(1).map(row => {
+      return headers.reduce((obj, header, i) => {
+        obj[header.trim()] = row[i]?.trim();
+        return obj;
+      }, {});
+    });
+
+    // ส่งข้อมูลไป Apps Script ทีละคน
+    students.forEach(student => {
+      fetch(scriptURL, {
+        method: 'POST',
+        body: JSON.stringify({ type: "import", student }),
+        headers: { "Content-Type": "application/json" }
+      });
+    });
+
+    alert("อัปโหลดสำเร็จแล้ว!");
+  };
+  reader.readAsText(file);
+}
   </script>
 </body>
 </html>
