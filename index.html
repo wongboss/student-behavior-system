@@ -96,6 +96,7 @@
     <button onclick="showForm('checkinForm')">ระบบเข้าแถว</button>
     <button onclick="showForm('behaviorForm')">ระบบคะแนนพฤติกรรม</button>
     <button onclick="showForm('uploadSection')">นำเข้ารายชื่อ</button>
+    <button onclick="showForm('dashboard')">แดชบอร์ด</button>
   </nav>
 
   <section id="checkinForm">
@@ -153,16 +154,25 @@
   <button onclick="uploadCSV()">อัปโหลด</button>
 </section>
 
+  <section id="dashboard" style="display:none;">
+  <h3>แดชบอร์ดนักเรียน</h3>
+  <div id="dashboardData">กำลังโหลดข้อมูล...</div>
+</section>
+
   <div id="popup">✅ บันทึกข้อมูลสำเร็จ</div>
 
   <script>
     const scriptURL = 'https://script.google.com/macros/s/AKfycbxQBU75fyWhSgxWiRLShOkYEFhQ0aXxdbPiPL-ERD5sFvApGgCu0ccylDiy8--e7zrQfQ/exec';
 
     function showForm(id) {
-      document.getElementById('checkinForm').style.display = 'none';
-      document.getElementById('behaviorForm').style.display = 'none';
-      document.getElementById(id).style.display = 'block';
-    }
+  document.getElementById('checkinForm').style.display = 'none';
+  document.getElementById('behaviorForm').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'none';
+
+  document.getElementById(id).style.display = 'block';
+
+  if (id === 'dashboard') loadDashboard();
+}
 
     function submitForm(event, type) {
       event.preventDefault();
@@ -236,6 +246,25 @@
   };
   reader.readAsText(file);
 }
+    function loadDashboard() {
+  fetch(scriptURL.replace('/exec', '/dev') + '?action=getDashboardData')
+    .then(res => res.json())
+    .then(data => {
+      const dashboardDiv = document.getElementById('dashboardData');
+      dashboardDiv.innerHTML = data.map(student => `
+        <div style="margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
+          <strong>${student.name}</strong> (ห้อง ${student.room})<br/>
+          มาเรียน: ${student.checkin} วัน, มาสาย: ${student.late}, ขาด: ${student.absent}, ลา: ${student.leave}<br/>
+          คะแนนพฤติกรรม: ${student.behaviorScore}
+        </div>
+      `).join('');
+    })
+    .catch(err => {
+      document.getElementById('dashboardData').innerText = "เกิดข้อผิดพลาดในการโหลดข้อมูล";
+      console.error(err);
+    });
+}
+
   </script>
 </body>
 </html>
