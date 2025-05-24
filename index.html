@@ -150,15 +150,15 @@
   </section>
 
   <section id="uploadSection" style="display:none;">
-  <h3>นำเข้ารายชื่อนักเรียน (.csv)</h3>
-  <input type="file" id="csvFile" accept=".csv" />
-  <button onclick="uploadCSV()">อัปโหลด</button>
-</section>
+    <h3>นำเข้ารายชื่อนักเรียน (.csv)</h3>
+    <input type="file" id="csvFile" accept=".csv" />
+    <button onclick="uploadCSV()">อัปโหลด</button>
+  </section>
 
   <section id="dashboard" style="display:none;">
-  <h3>แดชบอร์ดนักเรียน</h3>
-  <div id="dashboardData">กำลังโหลดข้อมูล...</div>
-</section>
+    <h3>แดชบอร์ดนักเรียน</h3>
+    <div id="dashboardData">กำลังโหลดข้อมูล...</div>
+  </section>
 
   <div id="popup">✅ บันทึกข้อมูลสำเร็จ</div>
 
@@ -166,38 +166,37 @@
     const scriptURL = 'https://script.google.com/macros/s/AKfycbxQBU75fyWhSgxWiRLShOkYEFhQ0aXxdbPiPL-ERD5sFvApGgCu0ccylDiy8--e7zrQfQ/exec';
 
     function showForm(id) {
-  document.getElementById('checkinForm').style.display = 'none';
-  document.getElementById('behaviorForm').style.display = 'none';
-  document.getElementById('dashboard').style.display = 'none';
-  document.getElementById('uploadSection').style.display = 'none';
+      document.getElementById('checkinForm').style.display = 'none';
+      document.getElementById('behaviorForm').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'none';
+      document.getElementById('uploadSection').style.display = 'none';
 
-  document.getElementById(id).style.display = 'block';
+      document.getElementById(id).style.display = 'block';
 
-  if (id === 'dashboard') loadDashboard();
-}
+      if (id === 'dashboard') loadDashboard();
+    }
 
     function submitForm(event, type) {
       event.preventDefault();
       const form = event.target;
-      const data = {
-        type: type,
-        name: form.name.value,
-        classroom: form.classroom.value
-      };
+      const params = new URLSearchParams();
+      params.append('type', type);
+      params.append('name', form.name.value);
+      params.append('classroom', form.classroom.value);
 
       if (type === 'checkin') {
-        data.status = form.status.value;
-        data.reason = form.reason.value;
+        params.append('status', form.status.value);
+        params.append('reason', form.reason.value);
       } else if (type === 'behavior') {
-        data.behavior = form.behavior.value;
-        data.score = form.score.value;
+        params.append('behavior', form.behavior.value);
+        params.append('score', form.score.value);
       }
 
       fetch(scriptURL, {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: params,
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/x-www-form-urlencoded"
         }
       })
       .then(() => {
@@ -216,79 +215,82 @@
     }
 
     function uploadCSV() {
-  const fileInput = document.getElementById('csvFile');
-  const file = fileInput.files[0];
+      const fileInput = document.getElementById('csvFile');
+      const file = fileInput.files[0];
 
-  if (!file) {
-    alert("กรุณาเลือกไฟล์ CSV");
-    return;
-  }
+      if (!file) {
+        alert("กรุณาเลือกไฟล์ CSV");
+        return;
+      }
 
-  const reader = new FileReader();
-  reader.onload = function (e) {
-    const lines = e.target.result.trim().split('\n').map(line => line.split(','));
-    const headers = lines[0].map(h => h.trim());
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const lines = e.target.result.trim().split('\n').map(line => line.split(','));
+        const headers = lines[0].map(h => h.trim());
 
-    const indexMap = {
-      id: headers.indexOf("รหัสนักเรียน"),
-      name: headers.indexOf("ชื่อ - นามสกุล"),
-      number: headers.indexOf("เลขที่"),
-      room: headers.indexOf("ห้อง")
-    };
+        const indexMap = {
+          id: headers.indexOf("รหัสนักเรียน"),
+          name: headers.indexOf("ชื่อ - นามสกุล"),
+          number: headers.indexOf("เลขที่"),
+          room: headers.indexOf("ห้อง")
+        };
 
-    // ตรวจสอบคอลัมน์ที่จำเป็น
-    if (indexMap.name === -1 || indexMap.room === -1) {
-      alert("ไฟล์ต้องมีคอลัมน์ 'ชื่อ - นามสกุล' และ 'ห้อง'");
-      return;
+        if (indexMap.name === -1 || indexMap.room === -1) {
+          alert("ไฟล์ต้องมีคอลัมน์ 'ชื่อ - นามสกุล' และ 'ห้อง'");
+          return;
+        }
+
+        const students = lines.slice(1)
+          .filter(row => row.join('').trim() !== '')
+          .map(row => ({
+            name: row[indexMap.name]?.trim() || '',
+            classroom: row[indexMap.room]?.trim() || ''
+          }));
+
+        if (students.length === 0) {
+          alert("ไม่พบข้อมูลนักเรียนในไฟล์");
+          return;
+        }
+
+        Promise.all(
+          students.map(student => {
+            const params = new URLSearchParams();
+            params.append('type', 'import');
+            params.append('name', student.name);
+            params.append('classroom', student.classroom);
+
+            return fetch(scriptURL, {
+              method: 'POST',
+              body: params,
+              headers: { "Content-Type": "application/x-www-form-urlencoded" }
+            });
+          })
+        )
+        .then(() => alert("✅ อัปโหลดรายชื่อนักเรียนสำเร็จแล้ว!"))
+        .catch(err => alert("❌ เกิดข้อผิดพลาด: " + err));
+      };
+
+      reader.readAsText(file);
     }
-
-    const students = lines.slice(1)
-      .filter(row => row.join('').trim() !== '')
-      .map(row => ({
-        name: row[indexMap.name]?.trim() || '',
-        classroom: row[indexMap.room]?.trim() || ''
-      }));
-
-    if (students.length === 0) {
-      alert("ไม่พบข้อมูลนักเรียนในไฟล์");
-      return;
-    }
-
-    Promise.all(
-      students.map(student => {
-        return fetch(scriptURL, {
-          method: 'POST',
-          body: JSON.stringify({ type: "import", student }),
-          headers: { "Content-Type": "application/json" }
-        });
-      })
-    )
-    .then(() => alert("✅ อัปโหลดรายชื่อนักเรียนสำเร็จแล้ว!"))
-    .catch(err => alert("❌ เกิดข้อผิดพลาด: " + err));
-  };
-
-  reader.readAsText(file);
-}
 
     function loadDashboard() {
-  fetch(scriptURL.replace('/exec', '/dev') + '?action=getDashboardData')
-    .then(res => res.json())
-    .then(data => {
-      const dashboardDiv = document.getElementById('dashboardData');
-      dashboardDiv.innerHTML = data.map(student => `
-        <div style="margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
-          <strong>${student.name}</strong> (ห้อง ${student.room})<br/>
-          มาเรียน: ${student.checkin} วัน, มาสาย: ${student.late}, ขาด: ${student.absent}, ลา: ${student.leave}<br/>
-          คะแนนพฤติกรรม: ${student.behaviorScore}
-        </div>
-      `).join('');
-    })
-    .catch(err => {
-      document.getElementById('dashboardData').innerText = "เกิดข้อผิดพลาดในการโหลดข้อมูล";
-      console.error(err);
-    });
-}
-
+      fetch(scriptURL.replace('/exec', '/dev') + '?action=getDashboardData')
+        .then(res => res.json())
+        .then(data => {
+          const dashboardDiv = document.getElementById('dashboardData');
+          dashboardDiv.innerHTML = data.map(student => `
+            <div style="margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
+              <strong>${student.name}</strong> (ห้อง ${student.room})<br/>
+              มาเรียน: ${student.checkin} วัน, มาสาย: ${student.late}, ขาด: ${student.absent}, ลา: ${student.leave}<br/>
+              คะแนนพฤติกรรม: ${student.behaviorScore}
+            </div>
+          `).join('');
+        })
+        .catch(err => {
+          document.getElementById('dashboardData').innerText = "เกิดข้อผิดพลาดในการโหลดข้อมูล";
+          console.error(err);
+        });
+    }
   </script>
 </body>
 </html>
