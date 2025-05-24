@@ -179,37 +179,41 @@
       if (id === 'dashboard') loadDashboard();
     }
 
-    function submitForm(event, type) {
-      event.preventDefault();
-      const form = event.target;
-      const params = new URLSearchParams();
-      params.append('type', type);
-      params.append('name', form.name.value);
-      params.append('classroom', form.classroom.value);
+function submitForm(event, type) {
+  event.preventDefault();
+  const form = event.target;
+  const params = new URLSearchParams();
+  params.append('type', type);
+  params.append('name', form.name.value);
+  params.append('classroom', form.classroom.value);
 
-      if (type === 'checkin') {
-        params.append('status', form.status.value);
-        params.append('reason', form.reason.value);
-      } else if (type === 'behavior') {
-        params.append('behavior', form.behavior.value);
-        params.append('score', form.score.value);
-      }
+  if (type === 'checkin') {
+    params.append('status', form.status.value);
+    params.append('reason', form.reason.value);
+  } else if (type === 'behavior') {
+    params.append('behavior', form.behavior.value);
+    params.append('score', form.score.value);
+  }
 
-      fetch(scriptURL, {
-        method: 'POST',
-        mode: 'cors',
+  fetch(scriptURL, {
+    method: 'POST',
     headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify(data)
-})
-.then(response => response.json())
-.then(data => {
-  console.log('Success:', data);
-})
-.catch((error) => {
-  console.error('Error:', error);
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: params.toString()
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('Success:', data);
+    showPopup();
+    form.reset();
+  })
+  .catch((error) => {
+    console.error('Error:', error);
+    alert('❌ บันทึกไม่สำเร็จ: ' + error);
   });
+}
+
       
     function showPopup() {
       const popup = document.getElementById("popup");
