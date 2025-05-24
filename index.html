@@ -197,18 +197,20 @@
 
       fetch(scriptURL, {
         method: 'POST',
-        body: params,
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
-        }
-      })
-      .then(() => {
-        form.reset();
-        showPopup();
-      })
-      .catch(err => alert("เกิดข้อผิดพลาด: " + err));
-    }
-
+        mode: 'cors',
+    headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(data)
+})
+.then(response => response.json())
+.then(data => {
+  console.log('Success:', data);
+})
+.catch((error) => {
+  console.error('Error:', error);
+  });
+      
     function showPopup() {
       const popup = document.getElementById("popup");
       popup.style.display = "block";
