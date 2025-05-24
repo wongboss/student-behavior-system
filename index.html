@@ -224,14 +224,49 @@
 
   const reader = new FileReader();
   reader.onload = function (e) {
-    const lines = e.target.result.split('\n').map(line => line.split(','));
-    const headers = lines[0];
-    const students = lines.slice(1).map(row => {
-      return headers.reduce((obj, header, i) => {
-        obj[header.trim()] = row[i]?.trim();
-        return obj;
-      }, {});
-    });
+    const lines = e.target.result.trim().split('\n').map(line => line.split(','));
+    const headers = lines[0].map(h => h.trim());
+
+    const indexMap = {
+      id: headers.indexOf("รหัสนักเรียน"),
+      name: headers.indexOf("ชื่อ - นามสกุล"),
+      number: headers.indexOf("เลขที่"),
+      room: headers.indexOf("ห้อง")
+    };
+
+    // ตรวจสอบคอลัมน์ที่จำเป็น
+    if (indexMap.name === -1 || indexMap.room === -1) {
+      alert("ไฟล์ต้องมีคอลัมน์ 'ชื่อ - นามสกุล' และ 'ห้อง'");
+      return;
+    }
+
+    const students = lines.slice(1)
+      .filter(row => row.join('').trim() !== '')
+      .map(row => ({
+        name: row[indexMap.name]?.trim() || '',
+        classroom: row[indexMap.room]?.trim() || ''
+      }));
+
+    if (students.length === 0) {
+      alert("ไม่พบข้อมูลนักเรียนในไฟล์");
+      return;
+    }
+
+    Promise.all(
+      students.map(student => {
+        return fetch(scriptURL, {
+          method: 'POST',
+          body: JSON.stringify({ type: "import", student }),
+          headers: { "Content-Type": "application/json" }
+        });
+      })
+    )
+    .then(() => alert("✅ อัปโหลดรายชื่อนักเรียนสำเร็จแล้ว!"))
+    .catch(err => alert("❌ เกิดข้อผิดพลาด: " + err));
+  };
+
+  reader.readAsText(file);
+}
 
     // ส่งข้อมูลไป Apps Script ทีละคน
     students.forEach(student => {
