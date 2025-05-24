@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ระบบดูแลพฤติกรรมนักเรียน</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: "Sarabun", sans-serif;
@@ -148,7 +149,7 @@
     </form>
   </section>
 
-  <section id="uploadSection">
+  <section id="uploadSection" style="display:none;">
   <h3>นำเข้ารายชื่อนักเรียน (.csv)</h3>
   <input type="file" id="csvFile" accept=".csv" />
   <button onclick="uploadCSV()">อัปโหลด</button>
@@ -168,6 +169,7 @@
   document.getElementById('checkinForm').style.display = 'none';
   document.getElementById('behaviorForm').style.display = 'none';
   document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('uploadSection').style.display = 'none';
 
   document.getElementById(id).style.display = 'block';
 
@@ -268,19 +270,6 @@
   reader.readAsText(file);
 }
 
-    // ส่งข้อมูลไป Apps Script ทีละคน
-    students.forEach(student => {
-      fetch(scriptURL, {
-        method: 'POST',
-        body: JSON.stringify({ type: "import", student }),
-        headers: { "Content-Type": "application/json" }
-      });
-    });
-
-    alert("อัปโหลดสำเร็จแล้ว!");
-  };
-  reader.readAsText(file);
-}
     function loadDashboard() {
   fetch(scriptURL.replace('/exec', '/dev') + '?action=getDashboardData')
     .then(res => res.json())
