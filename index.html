@@ -1,312 +1,952 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ระบบดูแลพฤติกรรมนักเรียน</title>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: "Sarabun", sans-serif;
-      background-color: #f9f8ff;
-      margin: 0;
-      padding: 0;
-      color: #4b0082;
-    }
-    header {
-      background-color: #6a0dad;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-    header h1 {
-      font-size: 2rem;
-      margin-bottom: 0.2em;
-    }
-    header h2 {
-      font-size: 1.2rem;
-      font-weight: normal;
-    }
-    nav {
-      display: flex;
-      justify-content: center;
-      margin: 20px 0;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    nav button {
-      background-color: #6a0dad;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      cursor: pointer;
-      font-size: 1rem;
-      border-radius: 8px;
-      flex: 1 0 120px;
-      min-width: 120px;
-      transition: background-color 0.3s ease;
-    }
-    nav button:hover {
-      background-color: #540a9e;
-    }
-    section {
-      max-width: 600px;
-      margin: auto;
-      padding: 20px;
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      display: none;
-    }
-    section.active {
-      display: block;
-    }
-    form > div {
-      margin-bottom: 15px;
-    }
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
-    input, select, textarea {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 1rem;
-      box-sizing: border-box;
-    }
-    button.submit-btn {
-      background-color: #6a0dad;
-      color: white;
-      border: none;
-      padding: 10px;
-      width: 100%;
-      border-radius: 8px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    button.submit-btn:hover {
-      background-color: #540a9e;
-    }
-    #popup {
-      display: none;
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      background: #6a0dad;
-      color: white;
-      padding: 15px 20px;
-      border-radius: 8px;
-      z-index: 1000;
-      font-weight: bold;
-      box-shadow: 0 0 10px rgba(106,13,173,0.8);
-    }
-    #dashboard h3 {
-      margin-top: 0;
-      text-align: center;
-    }
-    #dashboardData > div {
-      margin-bottom: 12px;
-      border-bottom: 1px solid #ddd;
-      padding-bottom: 10px;
-      font-size: 1rem;
-      color: #333;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบเช็คชื่อและบันทึกพฤติกรรมนักเรียน</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .tab-button {
+            background-color: #e9ecef;
+            border: none;
+            padding: 12px 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            color: #555;
+            border-radius: 8px 8px 0 0;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            margin: 0 2px;
+        }
+        .tab-button.active {
+            background-color: #007bff;
+            color: white;
+            border-bottom: 2px solid #007bff;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px 0;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 15px; /* Space between label and input */
+        }
+        .form-group label {
+            flex-basis: 120px; /* Fixed width for labels */
+            font-weight: bold;
+            color: #34495e;
+            text-align: right;
+        }
+        .form-group input[type="date"],
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group select,
+        .form-group textarea {
+            flex-grow: 1; /* Allow input to take remaining space */
+            padding: 10px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 16px;
+            box-sizing: border-box; /* Include padding and border in element's total width and height */
+            max-width: calc(100% - 135px); /* Adjust max-width based on label width and gap */
+        }
+        .form-group.full-width {
+            display: block; /* For elements that should take full width, e.g., buttons */
+            text-align: center;
+        }
+        .form-group.full-width input, .form-group.full-width select {
+            max-width: 100%;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 17px;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            display: block;
+            width: fit-content;
+            margin: 20px auto;
+        }
+        button:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .section-header {
+            background-color: #f0f0f0;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #34495e;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #f8f9fa;
+        }
+        table thead th {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            font-size: 15px;
+            border-bottom: 2px solid #dee2e6;
+        }
+        table tbody td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #dee2e6;
+            vertical-align: middle;
+        }
+        table tbody tr:nth-child(even) {
+            background-color: #e9ecef;
+        }
+        table tbody tr:hover {
+            background-color: #d7eaff;
+        }
+        .student-status {
+            display: flex;
+            gap: 10px;
+        }
+        .student-status input[type="radio"] {
+            margin-right: 5px;
+        }
+        .message-box {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            padding: 12px 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            display: none; /* Hidden by default */
+        }
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .hidden {
+            display: none;
+        }
+        .flex-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        .card {
+            background-color: #e9f5ff; /* Light blue background */
+            border: 1px solid #cceeff; /* Light blue border */
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            flex: 1; /* Allow cards to grow and shrink */
+            min-width: 250px; /* Minimum width before wrapping */
+        }
+        .card h3 {
+            color: #0056b3; /* Darker blue for heading */
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        .card p {
+            font-size: 18px;
+            color: #333;
+        }
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            margin: 20px auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #fff;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        .profile-section {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #f9f9f9;
+        }
+        .profile-info p {
+            margin: 8px 0;
+            font-size: 1.1em;
+        }
+        .profile-summary {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        .summary-item {
+            text-align: center;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            background-color: #fff;
+            flex: 1;
+            margin: 0 5px;
+        }
+        .summary-item h4 {
+            margin-top: 0;
+            color: #007bff;
+        }
+        .summary-item p {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+        }
+        .behavior-history ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .behavior-history li {
+            background-color: #e6f7ff;
+            border: 1px solid #b3e0ff;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            padding: 10px;
+            font-size: 0.95em;
+        }
+        .behavior-history li span {
+            font-weight: bold;
+            color: #0056b3;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <header>
-    <h1>ระบบดูแลพฤติกรรมนักเรียน</h1>
-    <h2>โรงเรียนบ้านหนองม่วงวิทยาคาร</h2>
-  </header>
+    <div class="container">
+        <h1>ระบบจัดการข้อมูลนักเรียน</h1>
 
-  <nav>
-    <button onclick="showForm('checkinForm')">ระบบเข้าแถว</button>
-    <button onclick="showForm('behaviorForm')">ระบบคะแนนพฤติกรรม</button>
-    <button onclick="showForm('uploadSection')">นำเข้ารายชื่อ</button>
-    <button onclick="showForm('dashboard')">แดชบอร์ด</button>
-  </nav>
+        <div class="tab-container">
+            <button class="tab-button active" onclick="openTab(event, 'attendance')">บันทึกการเช็คชื่อ</button>
+            <button class="tab-button" onclick="openTab(event, 'behavior')">บันทึกพฤติกรรม</button>
+            <button class="tab-button" onclick="openTab(event, 'studentProfile')">ข้อมูลนักเรียนรายบุคคล</button>
+            <button class="tab-button" onclick="openTab(event, 'classOverview')">ภาพรวมชั้นเรียน</button>
+        </div>
 
-  <section id="checkinForm" class="active">
-    <form onsubmit="submitForm(event, 'checkin')">
-      <div>
-        <label>ชื่อนักเรียน</label>
-        <input type="text" name="name" required />
-      </div>
-      <div>
-        <label>ห้องเรียน</label>
-        <input type="text" name="classroom" required />
-      </div>
-      <div>
-        <label>สถานะ</label>
-        <select name="status" required>
-          <option value="มา">มา</option>
-          <option value="ขาด">ขาด</option>
-          <option value="มาสาย">มาสาย</option>
-          <option value="ลา">ลา</option>
-        </select>
-      </div>
-      <div>
-        <label>เหตุผล (ถ้ามี)</label>
-        <textarea name="reason" rows="3"></textarea>
-      </div>
-      <button type="submit" class="submit-btn">บันทึกการเข้าแถว</button>
-    </form>
-  </section>
+        <div id="messageBox" class="message-box"></div>
 
-  <section id="behaviorForm">
-    <form onsubmit="submitForm(event, 'score')">
-      <div>
-        <label>ชื่อนักเรียน</label>
-        <input type="text" name="name" required />
-      </div>
-      <div>
-        <label>ห้องเรียน</label>
-        <input type="text" name="classroom" required />
-      </div>
-      <div>
-        <label>พฤติกรรม</label>
-        <input type="text" name="behavior" required />
-      </div>
-      <div>
-        <label>คะแนน (ใส่เลขลบถ้าตัดคะแนน เช่น -5)</label>
-        <input type="number" name="points" required />
-      </div>
-      <button type="submit" class="submit-btn">บันทึกพฤติกรรม</button>
-    </form>
-  </section>
+        <div id="attendance" class="tab-content active">
+            <h2>บันทึกการเช็คชื่อ</h2>
+            <div class="form-group">
+                <label for="attendanceDate">วันที่:</label>
+                <input type="date" id="attendanceDate" value="">
+            </div>
 
-  <section id="uploadSection">
-    <h3>นำเข้ารายชื่อนักเรียน (.csv)</h3>
-    <label for="csvFile" style="cursor:pointer; color:#6a0dad; font-weight:bold; display: inline-block; margin-bottom: 8px;">
-      เลือกไฟล์ CSV (.csv)
-    </label>
-    <input type="file" id="csvFile" accept=".csv" style="display: block; margin-bottom: 10px;" />
-    <button type="button" onclick="uploadCSV()" class="submit-btn">อัปโหลดรายชื่อ</button>
-  </section>
+            <div class="section-header">รายชื่อนักเรียน</div>
+            <table id="studentListTable">
+                <thead>
+                    <tr>
+                        <th>รหัส</th> <th>ชื่อ - นามสกุล</th>
+                        <th>เลขที่</th> <th>ชั้น</th> <th>สถานะ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+            <button id="saveAttendanceBtn">บันทึกการเช็คชื่อ</button>
+        </div>
 
-  <section id="dashboard">
-    <h3>แดชบอร์ดนักเรียน</h3>
-    <div id="dashboardData">กำลังโหลดข้อมูล...</div>
-  </section>
+        <div id="behavior" class="tab-content">
+            <h2>บันทึกพฤติกรรมนักเรียน</h2>
+            <div class="form-group">
+                <label for="behaviorDate">วันที่:</label>
+                <input type="date" id="behaviorDate" value="">
+            </div>
+            <div class="form-group">
+                <label for="studentBehaviorSelect">นักเรียน:</label>
+                <select id="studentBehaviorSelect">
+                    <option value="">เลือกนักเรียน</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="behaviorScore">คะแนน:</label>
+                <select id="behaviorScore">
+                    <option value="+1">ดี</option>
+                    <option value="-1">ลบ</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="behaviorType">ประเภท:</label>
+                <input type="text" id="behaviorType" placeholder="เช่น ความประพฤติ, การเรียน, ความรับผิดชอบ">
+            </div>
+            <div class="form-group">
+                <label for="behaviorNote">บันทึกเพิ่มเติม:</label>
+                <textarea id="behaviorNote" placeholder="รายละเอียดพฤติกรรม"></textarea>
+            </div>
+            <button id="saveBehaviorBtn">บันทึกพฤติกรรม</button>
+        </div>
 
-  <div id="popup">✅ บันทึกข้อมูลสำเร็จ</div>
+        <div id="studentProfile" class="tab-content">
+            <h2>ข้อมูลนักเรียนรายบุคคล</h2>
+            <div class="form-group">
+                <label for="studentProfileSelect">นักเรียน:</label>
+                <select id="studentProfileSelect">
+                    <option value="">เลือกนักเรียน</option>
+                </select>
+            </div>
+            <button id="viewProfileBtn">ดูข้อมูล</button>
 
-<script>
-  const scriptURL = 'https://script.google.com/macros/s/AKfycbxQBU75fyWhSgxWiRLShOkYEFhQ0aXxdbPiPL-ERD5sFvApGgCu0ccylDiy8--e7zrQfQ/exec';
+            <div id="profileDetails" class="hidden">
+                <div class="profile-section">
+                    <h3>โปรไฟล์นักเรียน: <span id="profileName"></span> (เลขที่: <span id="profileNumber"></span> / ชั้น: <span id="profileClass"></span>)</h3> <div class="profile-summary">
+                        <div class="summary-item">
+                            <h4>มาเรียน</h4>
+                            <p id="attendancePresent"></p>
+                        </div>
+                        <div class="summary-item">
+                            <h4>มาสาย</h4>
+                            <p id="attendanceLate"></p>
+                        </div>
+                        <div class="summary-item">
+                            <h4>ขาดเรียน</h4>
+                            <p id="attendanceAbsent"></p>
+                        </div>
+                    </div>
+                    <div class="summary-item">
+                        <h4>คะแนนพฤติกรรมรวม</h4>
+                        <p id="totalBehaviorScore"></p>
+                    </div>
+                </div>
 
-  function showForm(id) {
-    ['checkinForm', 'behaviorForm', 'uploadSection', 'dashboard'].forEach(sectionId => {
-      document.getElementById(sectionId).classList.remove('active');
-    });
-    document.getElementById(id).classList.add('active');
-    if (id === 'dashboard') loadDashboard();
-  }
+                <div class="profile-section behavior-history">
+                    <h3>ประวัติพฤติกรรม</h3>
+                    <ul id="behaviorHistoryList">
+                        </ul>
+                </div>
+            </div>
+        </div>
 
-  async function submitForm(event, mode) {
-    event.preventDefault();
-    const form = event.target;
+        <div id="classOverview" class="tab-content">
+            <h2>ภาพรวมชั้นเรียน</h2>
+            <div class="form-group">
+                <label for="classOverviewSelect">เลือกชั้น:</label> <select id="classOverviewSelect">
+                    <option value="">เลือกชั้น</option>
+                </select>
+            </div>
+            <button id="viewClassOverviewBtn">ดูภาพรวม</button>
 
-    const data = { mode };
+            <div id="classOverviewDetails" class="hidden">
+                <div class="flex-container">
+                    <div class="card">
+                        <h3>ภาพรวมการเข้าเรียน</h3>
+                        <canvas id="attendanceOverviewChart"></canvas>
+                    </div>
+                    <div class="card">
+                        <h3>คะแนนพฤติกรรมเฉลี่ย</h3>
+                        <canvas id="behaviorOverviewChart"></canvas>
+                    </div>
+                </div>
 
-    if (mode === 'checkin') {
-      data.name = form.name.value.trim();
-      data.classroom = form.classroom.value.trim();
-      data.status = form.status.value;
-      data.reason = form.reason.value.trim();
-    } else if (mode === 'score') {
-      data.name = form.name.value.trim();
-      data.classroom = form.classroom.value.trim();
-      data.behavior = form.behavior.value.trim();
-      data.points = Number(form.points.value);
-    }
+                <div class="section-header">นักเรียนที่มีพฤติกรรมดีเด่น 5 อันดับแรก</div>
+                <ul id="topBehaviorStudentsList"></ul>
 
-    try {
-      const response = await fetch(scriptURL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      const result = await response.json();
-      if (result.result === "success") {
-        showPopup('✅ บันทึกข้อมูลสำเร็จ');
-        form.reset();
-      } else {
-        showPopup('❌ เกิดข้อผิดพลาดในการบันทึก');
-      }
-    } catch (error) {
-      showPopup('❌ ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
-      console.error(error);
-    }
-  }
+                <div class="section-header">นักเรียนที่ต้องปรับปรุงพฤติกรรม 5 อันดับสุดท้าย</div>
+                <ul id="worstBehaviorStudentsList"></ul>
 
-  function showPopup(message) {
-    const popup = document.getElementById('popup');
-    popup.textContent = message;
-    popup.style.display = 'block';
-    setTimeout(() => { popup.style.display = 'none'; }, 3000);
-  }
+                <div class="section-header">คะแนนพฤติกรรมเฉลี่ยรายเดือน</div>
+                <canvas id="monthlyBehaviorChart"></canvas>
+            </div>
+        </div>
+    </div>
 
-  function uploadCSV() {
-    const fileInput = document.getElementById('csvFile');
-    if (!fileInput.files.length) {
-      alert('กรุณาเลือกไฟล์ CSV ก่อนอัปโหลด');
-      return;
-    }
-    const file = fileInput.files[0];
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const csvData = e.target.result;
-      try {
-        const response = await fetch(scriptURL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ mode: 'import', csv: csvData })
-        });
-        const result = await response.json();
-        if (result.result === "success") {
-          showPopup('✅ อัปโหลดรายชื่อสำเร็จ');
-          fileInput.value = "";
-        } else {
-          showPopup('❌ อัปโหลดรายชื่อไม่สำเร็จ');
+    <script>
+        // *** เปลี่ยน YOUR_WEB_APP_URL_HERE ด้วย URL ของ Web App ของคุณจริงๆ ที่ได้จาก Google Apps Script ***
+        const GOOGLE_APPS_SCRIPT_URL = 'YOUR_WEB_APP_URL_HERE'; // เช่น 'https://script.google.com/macros/s/AKfycbz_XXXXXXXXXXXXXX/exec'
+
+        let allStudents = []; // เก็บรายชื่อนักเรียนทั้งหมดที่โหลดมา
+        let attendanceChartInstance;
+        let behaviorChartInstance;
+        let monthlyBehaviorChartInstance;
+
+        // --- UI Functions ---
+        function openTab(evt, tabName) {
+            const tabContents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].style.display = "none";
+                tabContents[i].classList.remove('active');
+            }
+
+            const tabButtons = document.getElementsByClassName("tab-button");
+            for (let i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].classList.remove("active");
+            }
+
+            document.getElementById(tabName).style.display = "block";
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add("active");
+
+            // เมื่อเปลี่ยน Tab ให้ทำการโหลดข้อมูลที่เกี่ยวข้อง
+            if (tabName === 'attendance') {
+                loadStudents();
+                document.getElementById('attendanceDate').valueAsDate = new Date();
+            } else if (tabName === 'behavior') {
+                populateStudentSelect('studentBehaviorSelect');
+                document.getElementById('behaviorDate').valueAsDate = new Date();
+            } else if (tabName === 'studentProfile') {
+                populateStudentSelect('studentProfileSelect');
+                document.getElementById('profileDetails').classList.add('hidden'); // ซ่อนรายละเอียดเดิม
+            } else if (tabName === 'classOverview') {
+                populateClassSelect('classOverviewSelect');
+                document.getElementById('classOverviewDetails').classList.add('hidden'); // ซ่อนรายละเอียดเดิม
+            }
         }
-      } catch (error) {
-        showPopup('❌ ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
-        console.error(error);
-      }
-    };
-    reader.readAsText(file, 'UTF-8');
-  }
 
-  async function loadDashboard() {
-    const dashDiv = document.getElementById('dashboardData');
-    dashDiv.textContent = 'กำลังโหลดข้อมูล...';
+        function showMessage(message, isError = false) {
+            const msgBox = document.getElementById('messageBox');
+            msgBox.textContent = message;
+            msgBox.className = 'message-box'; // Reset classes
+            if (isError) {
+                msgBox.classList.add('error-message');
+            }
+            msgBox.style.display = 'block';
+            setTimeout(() => {
+                msgBox.style.display = 'none';
+            }, 5000); // Hide after 5 seconds
+        }
 
-    try {
-      const response = await fetch(scriptURL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode: 'dashboard' })
-      });
-      const data = await response.json();
-      if (data.result === "success" && data.data) {
-        dashDiv.innerHTML = '';
-        data.data.forEach(item => {
-          const div = document.createElement('div');
-          div.textContent = `ชื่อ: ${item.name} | ห้อง: ${item.classroom} | คะแนนรวม: ${item.total_score}`;
-          dashDiv.appendChild(div);
+        // --- Data Handling Functions ---
+        async function sendDataToGoogleSheets(data) {
+            try {
+                if (data.action === 'getStudents') {
+                    const params = new URLSearchParams(data).toString();
+                    const response = await fetch(`${GOOGLE_APPS_SCRIPT_URL}?${params}`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const result = await response.json();
+                    if (!result.success) {
+                        throw new Error(result.message || 'Failed to fetch data from Apps Script');
+                    }
+                    return result;
+                } else {
+                    const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'cors',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error("HTTP Error Response:", errorText);
+                        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+                    }
+                    const result = await response.json();
+                    if (!result.success) {
+                        throw new Error(result.message || 'Failed to process request in Apps Script');
+                    }
+                    return result;
+                }
+            } catch (error) {
+                console.error('Error sending data to Google Sheets:', error);
+                showMessage(`เกิดข้อผิดพลาด: ${error.message}`, true);
+                return { success: false, message: error.message };
+            }
+        }
+
+        async function loadStudents() {
+            try {
+                const result = await sendDataToGoogleSheets({ action: 'getStudents' });
+                if (result.success) {
+                    allStudents = result.data;
+                    displayStudentList(allStudents);
+                    populateStudentSelect('studentBehaviorSelect');
+                    populateStudentSelect('studentProfileSelect');
+                    populateClassSelect('classOverviewSelect');
+                    showMessage('โหลดรายชื่อนักเรียนสำเร็จ', false);
+                } else {
+                    showMessage('ไม่สามารถโหลดรายชื่อนักเรียนได้: ' + result.message, true);
+                }
+            } catch (error) {
+                console.error('Error loading students:', error);
+                showMessage('เกิดข้อผิดพลาดในการโหลดรายชื่อนักเรียน: ' + error.message, true);
+            }
+        }
+
+        function displayStudentList(students) {
+            const tbody = document.querySelector('#studentListTable tbody');
+            tbody.innerHTML = '';
+
+            // จัดเรียงนักเรียนตามชั้นและเลขที่
+            students.sort((a, b) => {
+                // เปรียบเทียบตามชั้นก่อน
+                const classCompare = a.class.localeCompare(b.class);
+                if (classCompare !== 0) {
+                    return classCompare;
+                }
+                // ถ้าชั้นเดียวกัน ให้เปรียบเทียบตามเลขที่
+                return a.number - b.number;
+            });
+
+            students.forEach(student => {
+                const row = tbody.insertRow();
+                row.insertCell().textContent = student.id; // คอลัมน์ รหัส
+                row.insertCell().textContent = `${student.name} ${student.surname}`; // คอลัมน์ ชื่อ - นามสกุล
+                row.insertCell().textContent = student.number; // คอลัมน์ เลขที่
+                row.insertCell().textContent = student.class; // คอลัมน์ ชั้น (เดิมคือห้อง)
+
+                const statusCell = row.insertCell();
+                statusCell.className = 'student-status';
+                const statuses = ['มาเรียน', 'มาสาย', 'ขาดเรียน'];
+                statuses.forEach(status => {
+                    // ใช้ student.id หรือ student.number ที่เป็น unique สำหรับชื่อ radio group
+                    const radioGroupName = `status-${student.id || student.number}`; 
+                    const radioId = `status-${student.id || student.number}-${status}`;
+                    statusCell.innerHTML += `
+                        <input type="radio" id="${radioId}" name="${radioGroupName}" value="${status}">
+                        <label for="${radioId}">${status}</label>
+                    `;
+                });
+            });
+        }
+
+        function populateStudentSelect(selectId) {
+            const selectElement = document.getElementById(selectId);
+            selectElement.innerHTML = '<option value="">เลือกนักเรียน</option>';
+
+            const sortedStudents = [...allStudents].sort((a, b) => {
+                if (a.class !== b.class) {
+                    return a.class.localeCompare(b.class);
+                }
+                return a.number - b.number;
+            });
+
+            sortedStudents.forEach(student => {
+                const option = document.createElement('option');
+                // เก็บ id เพื่อใช้อ้างอิง (ถ้ามี) หรือใช้ name, surname, class, number
+                option.value = JSON.stringify(student); 
+                option.textContent = `${student.name} ${student.surname} (ชั้น: ${student.class}, เลขที่: ${student.number}, รหัส: ${student.id})`; // ปรับการแสดงผล
+                selectElement.appendChild(option);
+            });
+        }
+
+        function populateClassSelect(selectId) {
+            const selectElement = document.getElementById(selectId);
+            selectElement.innerHTML = '<option value="">เลือกชั้น</option>'; // เปลี่ยนเป็นเลือกชั้น
+
+            const classes = new Set();
+            allStudents.forEach(student => classes.add(student.class));
+
+            const sortedClasses = Array.from(classes).sort();
+
+            sortedClasses.forEach(_class => {
+                const option = document.createElement('option');
+                option.value = _class;
+                option.textContent = `ชั้น: ${_class}`;
+                selectElement.appendChild(option);
+            });
+        }
+
+
+        // --- Event Listeners ---
+
+        document.getElementById('saveAttendanceBtn').addEventListener('click', async () => {
+            const attendanceDate = document.getElementById('attendanceDate').value;
+            if (!attendanceDate) {
+                showMessage('กรุณาระบุวันที่เช็คชื่อ', true);
+                return;
+            }
+
+            const attendanceRecords = [];
+            const rows = document.querySelectorAll('#studentListTable tbody tr');
+            let allStudentsChecked = true;
+
+            rows.forEach(row => {
+                // ดึงข้อมูลจากเซลล์ให้ตรงกับคอลัมน์ใหม่
+                const studentId = row.cells[0].textContent; // รหัส
+                const fullName = row.cells[1].textContent; // ชื่อ - นามสกุล
+                const studentNumber = parseInt(row.cells[2].textContent); // เลขที่
+                const studentClass = row.cells[3].textContent; // ชั้น
+
+                const nameParts = fullName.split(' ');
+                const studentName = nameParts[0];
+                const studentSurname = nameParts.slice(1).join(' ');
+
+                const selectedStatus = row.querySelector(`input[name="status-${studentId || studentNumber}"]:checked`); // ใช้ ID หรือ เลขที่ สำหรับ radio group name
+                if (selectedStatus) {
+                    attendanceRecords.push({
+                        date: attendanceDate,
+                        // ใช้ name, surname, class, number ในการบันทึก เพราะ Apps Script ถูกตั้งค่าให้บันทึกแบบนี้
+                        studentName: studentName,
+                        studentSurname: studentSurname,
+                        studentClass: studentClass,
+                        studentNumber: studentNumber,
+                        status: selectedStatus.value
+                    });
+                } else {
+                    allStudentsChecked = false;
+                }
+            });
+
+            if (!allStudentsChecked) {
+                showMessage('กรุณาเลือกสถานะการเช็คชื่อสำหรับนักเรียนทุกคน', true);
+                return;
+            }
+            if (attendanceRecords.length === 0) {
+                showMessage('ไม่มีข้อมูลนักเรียนให้บันทึก', true);
+                return;
+            }
+
+            const result = await sendDataToGoogleSheets({
+                action: 'saveMultipleAttendance',
+                records: attendanceRecords
+            });
+
+            if (result.success) {
+                showMessage(result.message || 'บันทึกการเช็คชื่อสำเร็จ', false);
+            } else {
+                showMessage(result.message || 'บันทึกการเช็คชื่อไม่สำเร็จ', true);
+            }
         });
-      } else {
-        dashDiv.textContent = 'ไม่พบข้อมูล หรือเกิดข้อผิดพลาด';
-      }
-    } catch (error) {
-      dashDiv.textContent = 'เกิดข้อผิดพลาดในการโหลดข้อมูล';
-      console.error(error);
-    }
-  }
-</script>
+
+        document.getElementById('saveBehaviorBtn').addEventListener('click', async () => {
+            const behaviorDate = document.getElementById('behaviorDate').value;
+            const studentSelect = document.getElementById('studentBehaviorSelect');
+            const selectedStudentJson = studentSelect.value;
+            const behaviorScore = document.getElementById('behaviorScore').value;
+            const behaviorType = document.getElementById('behaviorType').value.trim();
+            const behaviorNote = document.getElementById('behaviorNote').value.trim();
+
+            if (!behaviorDate || !selectedStudentJson || !behaviorType) {
+                showMessage('กรุณากรอกข้อมูล วันที่, นักเรียน, และประเภทพฤติกรรมให้ครบถ้วน', true);
+                return;
+            }
+
+            const selectedStudent = JSON.parse(selectedStudentJson);
+
+            const result = await sendDataToGoogleSheets({
+                action: 'saveBehavior',
+                date: behaviorDate,
+                studentName: selectedStudent.name,
+                studentSurname: selectedStudent.surname,
+                studentClass: selectedStudent.class, // ใช้ field 'class' ที่เก็บค่า 'ชั้น'
+                studentNumber: selectedStudent.number,
+                score: (behaviorScore === '+1') ? 'ดี' : 'ลบ',
+                type: behaviorType,
+                note: behaviorNote
+            });
+
+            if (result.success) {
+                showMessage('บันทึกพฤติกรรมสำเร็จ', false);
+                studentSelect.value = '';
+                document.getElementById('behaviorScore').value = '+1';
+                document.getElementById('behaviorType').value = '';
+                document.getElementById('behaviorNote').value = '';
+            } else {
+                showMessage('บันทึกพฤติกรรมไม่สำเร็จ: ' + result.message, true);
+            }
+        });
+
+        document.getElementById('viewProfileBtn').addEventListener('click', async () => {
+            const studentSelect = document.getElementById('studentProfileSelect');
+            const selectedStudentJson = studentSelect.value;
+
+            if (!selectedStudentJson) {
+                showMessage('กรุณาเลือกนักเรียนเพื่อดูข้อมูล', true);
+                return;
+            }
+
+            const selectedStudent = JSON.parse(selectedStudentJson);
+
+            const result = await sendDataToGoogleSheets({
+                action: 'getStudentProfile',
+                studentName: selectedStudent.name,
+                studentSurname: selectedStudent.surname,
+                studentClass: selectedStudent.class, // ใช้ field 'class'
+                studentNumber: selectedStudent.number
+            });
+
+            const profileDetailsDiv = document.getElementById('profileDetails');
+            const profileNameSpan = document.getElementById('profileName');
+            const profileClassSpan = document.getElementById('profileClass');
+            const profileNumberSpan = document.getElementById('profileNumber');
+            const attendancePresentP = document.getElementById('attendancePresent');
+            const attendanceLateP = document.getElementById('attendanceLate');
+            const attendanceAbsentP = document.getElementById('attendanceAbsent');
+            const totalBehaviorScoreP = document.getElementById('totalBehaviorScore');
+            const behaviorHistoryList = document.getElementById('behaviorHistoryList');
+
+            if (result.success) {
+                const data = result.data;
+                profileNameSpan.textContent = `${selectedStudent.name} ${selectedStudent.surname}`;
+                profileClassSpan.textContent = selectedStudent.class; // แสดง ชั้น
+                profileNumberSpan.textContent = selectedStudent.number; // แสดง เลขที่
+
+                attendancePresentP.textContent = data.attendanceSummary['มาเรียน'];
+                attendanceLateP.textContent = data.attendanceSummary['มาสาย'];
+                attendanceAbsentP.textContent = data.attendanceSummary['ขาดเรียน'];
+                totalBehaviorScoreP.textContent = data.totalBehaviorScore;
+
+                behaviorHistoryList.innerHTML = '';
+                if (data.behaviorHistory && data.behaviorHistory.length > 0) {
+                    data.behaviorHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    data.behaviorHistory.forEach(record => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `
+                            <span>${record.date}:</span>
+                            คะแนน: <span>${record.score}</span>,
+                            ประเภท: <span>${record.type}</span>,
+                            บันทึก: <span>${record.note || '-'}</span>
+                        `;
+                        behaviorHistoryList.appendChild(li);
+                    });
+                } else {
+                    behaviorHistoryList.innerHTML = '<li>ยังไม่มีประวัติพฤติกรรม</li>';
+                }
+
+                profileDetailsDiv.classList.remove('hidden');
+                showMessage('แสดงข้อมูลโปรไฟล์นักเรียนสำเร็จ', false);
+            } else {
+                profileDetailsDiv.classList.add('hidden');
+                showMessage('ไม่สามารถโหลดข้อมูลโปรไฟล์นักเรียนได้: ' + result.message, true);
+            }
+        });
+
+        document.getElementById('viewClassOverviewBtn').addEventListener('click', async () => {
+            const classSelect = document.getElementById('classOverviewSelect');
+            const selectedClass = classSelect.value;
+
+            if (!selectedClass) {
+                showMessage('กรุณาเลือกชั้นเรียนเพื่อดูภาพรวม', true);
+                return;
+            }
+
+            const result = await sendDataToGoogleSheets({
+                action: 'getClassOverview',
+                class: selectedClass // ส่งค่า 'ชั้น' ไป
+            });
+
+            const classOverviewDetailsDiv = document.getElementById('classOverviewDetails');
+            const topBehaviorStudentsList = document.getElementById('topBehaviorStudentsList');
+            const worstBehaviorStudentsList = document.getElementById('worstBehaviorStudentsList');
+
+            if (result.success) {
+                const data = result.data;
+                classOverviewDetailsDiv.classList.remove('hidden');
+
+                const attendanceCtx = document.getElementById('attendanceOverviewChart').getContext('2d');
+                if (attendanceChartInstance) {
+                    attendanceChartInstance.destroy();
+                }
+                attendanceChartInstance = new Chart(attendanceCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(data.attendanceChartData),
+                        datasets: [{
+                            data: Object.values(data.attendanceChartData),
+                            backgroundColor: [
+                                'rgba(40, 167, 69, 0.7)',
+                                'rgba(255, 193, 7, 0.7)',
+                                'rgba(220, 53, 69, 0.7)'
+                            ],
+                            borderColor: [
+                                'rgba(40, 167, 69, 1)',
+                                'rgba(255, 193, 7, 1)',
+                                'rgba(220, 53, 69, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: `สรุปการเข้าเรียนของชั้น ${selectedClass}`
+                            }
+                        }
+                    }
+                });
+
+                const behaviorCtx = document.getElementById('behaviorOverviewChart').getContext('2d');
+                if (behaviorChartInstance) {
+                    behaviorChartInstance.destroy();
+                }
+                behaviorChartInstance = new Chart(behaviorCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['คะแนนเฉลี่ย'],
+                        datasets: [{
+                            label: `คะแนนพฤติกรรมเฉลี่ยชั้น ${selectedClass}`,
+                            data: [data.behaviorChartData.average],
+                            backgroundColor: 'rgba(0, 123, 255, 0.7)',
+                            borderColor: 'rgba(0, 123, 255, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'คะแนน'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            title: {
+                                display: true,
+                                text: `คะแนนพฤติกรรมเฉลี่ยของชั้น ${selectedClass}`
+                            }
+                        }
+                    }
+                });
+
+                topBehaviorStudentsList.innerHTML = '';
+                if (data.topBehaviorStudents && data.topBehaviorStudents.length > 0) {
+                    data.topBehaviorStudents.forEach(student => {
+                        const li = document.createElement('li');
+                        li.textContent = `${student.name} ${student.surname}: ${student.score} คะแนน`;
+                        topBehaviorStudentsList.appendChild(li);
+                    });
+                } else {
+                    topBehaviorStudentsList.innerHTML = '<li>ไม่มีข้อมูลนักเรียน</li>';
+                }
+
+                worstBehaviorStudentsList.innerHTML = '';
+                if (data.worstBehaviorStudents && data.worstBehaviorStudents.length > 0) {
+                    data.worstBehaviorStudents.forEach(student => {
+                        const li = document.createElement('li');
+                        li.textContent = `${student.name} ${student.surname}: ${student.score} คะแนน`;
+                        worstBehaviorStudentsList.appendChild(li);
+                    });
+                } else {
+                    worstBehaviorStudentsList.innerHTML = '<li>ไม่มีข้อมูลนักเรียน</li>';
+                }
+
+                const monthlyBehaviorCtx = document.getElementById('monthlyBehaviorChart').getContext('2d');
+                if (monthlyBehaviorChartInstance) {
+                    monthlyBehaviorChartInstance.destroy();
+                }
+
+                const monthlyLabels = data.monthlySummary.map(item => item.month);
+                const monthlyData = data.monthlySummary.map(item => item.averageScore);
+
+                monthlyBehaviorChartInstance = new Chart(monthlyBehaviorCtx, {
+                    type: 'line',
+                    data: {
+                        labels: monthlyLabels,
+                        datasets: [{
+                            label: 'คะแนนพฤติกรรมเฉลี่ยรายเดือน',
+                            data: monthlyData,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            fill: true,
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'คะแนนเฉลี่ย'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'เดือน'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: `คะแนนพฤติกรรมเฉลี่ยรายเดือนของชั้น ${selectedClass}`
+                            }
+                        }
+                    }
+                });
+
+                showMessage('แสดงภาพรวมชั้นเรียนสำเร็จ', false);
+
+            } else {
+                classOverviewDetailsDiv.classList.add('hidden');
+                showMessage('ไม่สามารถโหลดภาพรวมชั้นเรียนได้: ' + result.message, true);
+            }
+        });
+
+
+        // Initial load when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('attendanceDate').valueAsDate = new Date();
+            document.getElementById('behaviorDate').valueAsDate = new Date();
+            openTab(null, 'attendance');
+            loadStudents();
+            console.log("GOOGLE_APPS_SCRIPT_URL configured:", GOOGLE_APPS_SCRIPT_URL);
+        });
+    </script>
 </body>
 </html>
