@@ -151,8 +151,11 @@
 
   <section id="uploadSection" style="display:none;">
     <h3>นำเข้ารายชื่อนักเรียน (.csv)</h3>
-    <input type="file" id="csvFile" accept=".csv" />
-    <button onclick="uploadCSV()">อัปโหลด</button>
+    <label for="csvFile" style="cursor:pointer; color:#6a0dad; font-weight:bold; display: inline-block; margin-bottom: 8px;">
+  เลือกไฟล์ CSV (.csv)
+    </label>
+    <input type="file" id="csvFile" accept=".csv" style="display: block; margin-bottom: 10px;" />
+    <button type="button" onclick="uploadCSV()">อัปโหลด</button>
   </section>
 
   <section id="dashboard" style="display:none;">
